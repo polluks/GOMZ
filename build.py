@@ -176,6 +176,6 @@ if exo:
         print(f"Compressed: {exo_file} ({exo_size} bytes, {pct:.1f}% reduction)")
 
 print(f"\n=== Build Complete ===")
-print(f"Usage: BLOAD\"GOMZ\",8,1 : SYS 7168")
+print(f"Usage: BLOAD \"GOMZ\" : SYS 7168")
 if exo:
-    print(f"       BOOT\"GOMZ_EXO\"")
+    print(f"       BOOT \"GOMZ_EXO\"")

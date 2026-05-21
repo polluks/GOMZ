@@ -36,8 +36,8 @@ build/gomz_exo.prg   (10976 bytes  - exomizer self-extracting)
 Transfer a PRG to disk or emulator, then:
 
 ```
-BLOAD"GOMZ",8,1 : SYS 7168
-BOOT"GOMZ_EXO"
+BLOAD "GOMZ" : SYS 7168
+BOOT "GOMZ_EXO"
 ```
 
 ## Monitor Commands
