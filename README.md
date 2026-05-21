@@ -1,4 +1,4 @@
-# MZ80K-C128 - Sharp MZ-80K Monitor Port for Commodore 128
+# GO MZ - Sharp MZ-80K Monitor Port for Commodore 128
 
 Ports the Sharp MZ-80K machine code monitor (with SP-5025 BASIC)
 to the Commodore 128's Z80 coprocessor (no CP/M needed).
