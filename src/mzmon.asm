@@ -64,6 +64,12 @@ start:
     ld hl,welcome
     call vdc_puts
 
+    ; Copy SID driver to $7F00 for MMU-safe I/O access
+    ld hl,sid_driver_start
+    ld de,$7F00
+    ld bc,sid_driver_end - sid_driver_start
+    ldir
+
     ; Show prompt
 prompt:
     ld hl,prompt_msg
@@ -940,8 +946,14 @@ compat_main:
     jp compat_notape
     jp compat_notape
     jp compat_notape
-    ; $30-$81: padding (unused vectors)
-    ds 82, 0
+    ; $30: SNDOUT (MUSIC note start)
+    jp compat_sndout
+    ; $33-$40: padding
+    ds 14, 0
+    ; $41: SNDSTOP (MUSIC note end)
+    jp compat_sndstop
+    ; $44-$81: padding
+    ds 62, 0
     ; $82: ST1 (warm start)
     jp compat_monit
 compat_main_end:
@@ -1419,6 +1431,53 @@ help_txt:
     db " G<addr> - Execute (Go)",$0A
     db " B       - SP-5025 BASIC",$0A
     db " H       - Help",$0A,0
+
+; ===== SPEAKER/SID DRIVER =====
+; Copied to $7F00 at startup. Switches MMU to config 15 (I/O at $D000)
+; to access the SID, then restores the original MMU config.
+
+SID_PLAY equ $7F00
+SID_STOP equ SID_PLAY + (sid_play_end - sid_driver_start)
+
+sid_driver_start:
+sid_play:
+    ld a,($FF00)
+    push af
+    ld a,$0F
+    ld ($FF00),a
+    ld a,$B4
+    ld ($D400),a
+    ld a,$0E
+    ld ($D401),a
+    ld a,$11
+    ld ($D404),a
+    ld a,$0F
+    ld ($D418),a
+    pop af
+    ld ($FF00),a
+    ret
+sid_play_end:
+sid_stop:
+    ld a,($FF00)
+    push af
+    ld a,$0F
+    ld ($FF00),a
+    ld a,$10
+    ld ($D404),a
+    ld a,$00
+    ld ($D418),a
+    pop af
+    ld ($FF00),a
+    ret
+sid_driver_end:
+
+; ===== COMPATIBILITY HANDLERS =====
+
+compat_sndout:
+    jp SID_PLAY
+
+compat_sndstop:
+    jp SID_STOP
 
 ; ===== VARIABLES =====
 
