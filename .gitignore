@@ -1,0 +1,4 @@
+build/
+*.bin
+*.prg
+*.o
