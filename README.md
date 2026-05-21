@@ -16,11 +16,9 @@ Z80 coprocessor (no CP/M needed). Runs bare-metal on the C128 Z80.
 
 ## Build
 
-Requires vasm and xa:
+Requires vasm (both vasmz80_oldstyle and vasm6502_mot):
 ```
-pacman -S xa                     # 6502 assembler
 (vasm built from http://sun.hasenbraten.de/vasm/)
-
 python3 build.py
 ```
 
@@ -34,5 +32,7 @@ Output: `build/mz80k_c128.prg`
 
 ## References
 
-- https://original.sharpmz.org/mz-80k/download/80kmoni.zip
+- https://www.idealine.info/sharpmz/mz-80k/dldos.htm (SP-5025 BASIC)
 - https://github.com/polluks/trsdos (C128 Z80 boot reference)
+- http://www.sharpmz.net/ (MZ-80K technical info)
+- https://original.sharpmz.org/mz-80k/download/80kmoni.zip (SP-1002 monitor ROM)

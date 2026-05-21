@@ -1,0 +1,319 @@
+; MZ80K-C128 Boot Loader
+; vasm motorola syntax: vasm6502_mot -Fbin -o mzboot.prg mzboot.mot
+; Requires: mzmon.bin (Z80 code), font.bin (2048 byte font)
+
+    org $1C00
+    dc.w $1C00
+
+VDCADR equ $D600
+VDCDAT equ $D601
+
+; ===== Entry =====
+boot:
+    sei
+    cld
+
+    ; Step 1: Set VDC registers for 40x25 display
+    jsr vdc_init
+
+    ; Step 2: Upload font to VDC CG RAM at $2000
+    ; Set VDC update address to $2000
+    lda #18
+    sta VDCADR
+    bit VDCADR
+    bpl *-3
+    lda #$20
+    sta VDCDAT
+
+    lda #19
+    sta VDCADR
+    bit VDCADR
+    bpl *-3
+    lda #$00
+    sta VDCDAT
+
+    ; Upload 2048 bytes of font
+    lda #>font_data
+    sta $FC
+    lda #<font_data
+    sta $FB
+    ldy #0
+    ldx #8          ; 8 pages of 256 bytes
+font_ul:
+    lda ($FB),y
+    pha
+    lda #31         ; VDC data register
+    sta VDCADR
+    bit VDCADR
+    bpl *-3
+    pla
+    sta VDCDAT
+    iny
+    bne font_ul
+    inc $FC
+    dex
+    bne font_ul
+
+    ; Step 3: Copy Z80 code to $C000
+    ; Set MMU to Config 0 (all RAM Bank 0) for writing
+    lda #0
+    sta $FF00
+    nop
+
+    lda #>z80_code
+    sta $FC
+    lda #<z80_code
+    sta $FB
+    lda #$C0
+    sta $FE
+    lda #$00
+    sta $FD
+
+    ; Copy Z80 binary (pages)
+    ldx #>z80_size
+    ldy #0
+zcp_l:
+    lda ($FB),y
+    sta ($FD),y
+    iny
+    bne zcp_l
+    inc $FC
+    inc $FE
+    dex
+    bne zcp_l
+    ; Remaining bytes
+    ldx #<z80_size
+    beq zcp_d
+zcp_r:
+    lda ($FB),y
+    sta ($FD),y
+    iny
+    dex
+    bne zcp_r
+zcp_d:
+
+    ; Step 3b: Copy SP-5025 BASIC to $8000
+    lda #>sp5025_data
+    sta $FC
+    lda #<sp5025_data
+    sta $FB
+    lda #$80
+    sta $FE
+    lda #$00
+    sta $FD
+
+    ldx #>sp5025_size
+    ldy #0
+scp_l:
+    lda ($FB),y
+    sta ($FD),y
+    iny
+    bne scp_l
+    inc $FC
+    inc $FE
+    dex
+    bne scp_l
+    ldx #<sp5025_size
+    beq scp_d
+scp_r:
+    lda ($FB),y
+    sta ($FD),y
+    iny
+    dex
+    bne scp_r
+scp_d:
+
+    ; Restore Config 15 (all ROMs, I/O) for hardware access
+    lda #15
+    sta $FF00
+    nop
+
+    ; Step 4: Set Z80 boot vector at $FFF0
+    ; JP $C000 = $C3 $00 $C0
+    lda #$C3
+    sta $FFF0
+    lda #$00
+    sta $FFF1
+    lda #$C0
+    sta $FFF2
+
+    ; Step 5: Switch to Z80 mode
+    ; Write to $D505 to enable Z80
+    lda #$B0
+    sta $D505
+
+    ; Should never reach here
+halt:
+    jmp halt
+
+; ===== VDC Initialization for 40x25 mode =====
+vdc_init:
+    ldx #$10
+vdc_d:
+    dex
+    bne vdc_d
+
+    ; R0: H total = 63
+    lda #0
+    sta VDCADR
+    bit VDCADR
+    bpl *-3
+    lda #63
+    sta VDCDAT
+
+    ; R1: H displayed = 40
+    lda #1
+    sta VDCADR
+    bit VDCADR
+    bpl *-3
+    lda #40
+    sta VDCDAT
+
+    ; R2: H sync = 52
+    lda #2
+    sta VDCADR
+    bit VDCADR
+    bpl *-3
+    lda #52
+    sta VDCDAT
+
+    ; R3: H sync width = 14
+    lda #3
+    sta VDCADR
+    bit VDCADR
+    bpl *-3
+    lda #14
+    sta VDCDAT
+
+    ; R4: V total = 33
+    lda #4
+    sta VDCADR
+    bit VDCADR
+    bpl *-3
+    lda #33
+    sta VDCDAT
+
+    ; R5: V adjust = 1
+    lda #5
+    sta VDCADR
+    bit VDCADR
+    bpl *-3
+    lda #1
+    sta VDCDAT
+
+    ; R6: V displayed = 25
+    lda #6
+    sta VDCADR
+    bit VDCADR
+    bpl *-3
+    lda #25
+    sta VDCDAT
+
+    ; R7: V sync = 28
+    lda #7
+    sta VDCADR
+    bit VDCADR
+    bpl *-3
+    lda #28
+    sta VDCDAT
+
+    ; R8: Interlace = 0
+    lda #8
+    sta VDCADR
+    bit VDCADR
+    bpl *-3
+    lda #0
+    sta VDCDAT
+
+    ; R9: Char height = 8
+    lda #9
+    sta VDCADR
+    bit VDCADR
+    bpl *-3
+    lda #8
+    sta VDCDAT
+
+    ; R10: Cursor off
+    lda #10
+    sta VDCADR
+    bit VDCADR
+    bpl *-3
+    lda #0
+    sta VDCDAT
+
+    ; R20: CG RAM base at $2000 in VDC VRAM
+    lda #20
+    sta VDCADR
+    bit VDCADR
+    bpl *-3
+    lda #$01       ; $2000 >> 13 = $01
+    sta VDCDAT
+
+    ; R23: White on black
+    lda #23
+    sta VDCADR
+    bit VDCADR
+    bpl *-3
+    lda #$07
+    sta VDCDAT
+
+    ; R24: Row increment = 40 (for 40-col)
+    lda #24
+    sta VDCADR
+    bit VDCADR
+    bpl *-3
+    lda #40
+    sta VDCDAT
+
+    ; R25: Char gen spacing = 8
+    lda #25
+    sta VDCADR
+    bit VDCADR
+    bpl *-3
+    lda #8
+    sta VDCDAT
+
+    ; Clear screen (fill 1000 positions with space)
+    lda #18
+    sta VDCADR
+    bit VDCADR
+    bpl *-3
+    lda #$00
+    sta VDCDAT
+
+    lda #19
+    sta VDCADR
+    bit VDCADR
+    bpl *-3
+    lda #$00
+    sta VDCDAT
+
+    lda #<1000
+    sta $FB
+    lda #>1000
+    sta $FC
+vdc_c:
+    lda #31
+    sta VDCADR
+    bit VDCADR
+    bpl *-3
+    lda #$20
+    sta VDCDAT
+    lda $FB
+    bne vdc_c
+    dec $FC
+    bpl vdc_c
+
+    rts
+
+; ===== Binary payloads (included via incbin) =====
+z80_code:
+    incbin "build/mzmon.bin"
+z80_size equ *-z80_code
+
+font_data:
+    incbin "build/font.bin"
+
+sp5025_data:
+    incbin "build/sp5025.bin"
+sp5025_size equ *-sp5025_data
