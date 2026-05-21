@@ -56,3 +56,4 @@ BOOT"MZ80K_C128_EXO"
 - https://github.com/polluks/trsdos (C128 Z80 boot reference)
 - http://www.sharpmz.net/ (MZ-80K technical info)
 - https://original.sharpmz.org/mz-80k/download/80kmoni.zip (SP-1002 monitor ROM)
+- https://github.com/psychotimmy/sharpmz-80k (Sharp MZ-80K reference)

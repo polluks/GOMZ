@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Build script for MZ80K-C128 Monitor.
+Build script for GO MZ Monitor.
 Uses vasm for both Z80 and 6502 assembly.
 """
 import subprocess, sys, os, shutil

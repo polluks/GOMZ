@@ -1425,7 +1425,7 @@ msg_m:
 msg_loading:
     db "LOAD...",$0A,0
 help_txt:
-    db "MZ80K-C128 Commands:",$0A
+    db "GO MZ Commands:",$0A
     db " D<addr> - Hex dump",$0A
     db " M<addr> - Modify memory",$0A
     db " G<addr> - Execute (Go)",$0A
