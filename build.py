@@ -3,7 +3,7 @@
 Build script for MZ80K-C128 Monitor.
 Uses vasm for both Z80 and 6502 assembly.
 """
-import subprocess, sys, os
+import subprocess, sys, os, shutil
 
 SRC = os.path.join(os.path.dirname(__file__), 'src')
 OUT = os.path.join(os.path.dirname(__file__), 'build')
@@ -157,6 +157,25 @@ if r.returncode:
     sys.exit(1)
 
 prg_size = os.path.getsize(prg_file)
+print(f"\nPRG: {prg_file} ({prg_size} bytes)")
+
+# Step 5: Compress with exomizer (if available)
+exo = shutil.which('exomizer')
+if exo:
+    print("\n=== Compressing with exomizer ===")
+    exo_file = os.path.join(OUT, 'mz80k_c128_exo.prg')
+    r = subprocess.run([exo, 'sfx', '0x1C02', '-t128', '-q', '-o', exo_file,
+                        prg_file + ',0x1C00'],
+                       capture_output=True, text=True)
+    if r.returncode:
+        print("WARNING: exomizer failed:", r.stderr, file=sys.stderr)
+    else:
+        exo_size = os.path.getsize(exo_file)
+        saved = prg_size - exo_size
+        pct = 100 * saved / prg_size
+        print(f"Compressed: {exo_file} ({exo_size} bytes, {pct:.1f}% reduction)")
+
 print(f"\n=== Build Complete ===")
-print(f"PRG: {prg_file} ({prg_size} bytes)")
-print(f"\nUsage: BLOAD\"MZ80K_C128\",8,1 : SYS 7168")
+print(f"Usage: BLOAD\"MZ80K_C128\",8,1 : SYS 7168")
+if exo:
+    print(f"       BOOT\"MZ80K_C128_EXO\"")
