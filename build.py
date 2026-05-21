@@ -148,7 +148,7 @@ print(f"SP-5025 BASIC: {len(sp5025_data)} bytes")
 # Step 4: Assemble 6502 boot loader
 print("\n=== Assembling 6502 boot loader ===")
 mot_src = os.path.join(SRC, 'mzboot.mot')
-prg_file = os.path.join(OUT, 'mz80k_c128.prg')
+prg_file = os.path.join(OUT, 'gomz.prg')
 r = subprocess.run([VASM6502, '-Fbin', '-o', prg_file, mot_src],
                    capture_output=True, text=True)
 print(r.stdout, end='')
@@ -163,7 +163,7 @@ print(f"\nPRG: {prg_file} ({prg_size} bytes)")
 exo = shutil.which('exomizer')
 if exo:
     print("\n=== Compressing with exomizer ===")
-    exo_file = os.path.join(OUT, 'mz80k_c128_exo.prg')
+    exo_file = os.path.join(OUT, 'gomz_exo.prg')
     r = subprocess.run([exo, 'sfx', '0x1C02', '-t128', '-q', '-o', exo_file,
                         prg_file + ',0x1C00'],
                        capture_output=True, text=True)
@@ -176,6 +176,6 @@ if exo:
         print(f"Compressed: {exo_file} ({exo_size} bytes, {pct:.1f}% reduction)")
 
 print(f"\n=== Build Complete ===")
-print(f"Usage: BLOAD\"MZ80K_C128\",8,1 : SYS 7168")
+print(f"Usage: BLOAD\"GOMZ\",8,1 : SYS 7168")
 if exo:
-    print(f"       BOOT\"MZ80K_C128_EXO\"")
+    print(f"       BOOT\"GOMZ_EXO\"")

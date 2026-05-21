@@ -27,8 +27,8 @@ python3 build.py
 
 Output:
 ```
-build/mz80k_c128.prg       (17038 bytes  - uncompressed)
-build/mz80k_c128_exo.prg   (10976 bytes  - exomizer self-extracting)
+build/gomz.prg       (17038 bytes  - uncompressed)
+build/gomz_exo.prg   (10976 bytes  - exomizer self-extracting)
 ```
 
 ## Usage on C128
@@ -36,8 +36,8 @@ build/mz80k_c128_exo.prg   (10976 bytes  - exomizer self-extracting)
 Transfer a PRG to disk or emulator, then:
 
 ```
-BLOAD"MZ80K_C128",8,1 : SYS 7168
-BOOT"MZ80K_C128_EXO"
+BLOAD"GOMZ",8,1 : SYS 7168
+BOOT"GOMZ_EXO"
 ```
 
 ## Monitor Commands
