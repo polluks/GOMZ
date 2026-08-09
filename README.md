@@ -57,3 +57,4 @@ BOOT "GOMZ_EXO"
 - http://www.sharpmz.net/ (MZ-80K technical info)
 - https://original.sharpmz.org/mz-80k/download/80kmoni.zip (SP-1002 monitor ROM)
 - https://github.com/psychotimmy/sharpmz-80k (Sharp MZ-80K reference)
+- https://github.com/psychotimmy/picomz-80k (emulator)
